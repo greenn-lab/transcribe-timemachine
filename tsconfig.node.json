@@ -8,12 +8,8 @@
   ],
   "compilerOptions": {
     "composite": true,
-    //"types": ["node"]
-    "target": "ESNext",
-    "lib": [
-      "ES2017.String",
-      "ESNext",
-      "dom"
+    "types": [
+      "node"
     ]
   }
 }
