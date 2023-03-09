@@ -8,3 +8,16 @@ export const today = (): string => {
     .join(':')
   return `${date} ${time}`
 }
+
+export const timeFormatter = (time: number) => {
+  if (!time) return ''
+
+  const seconds = ~~(time % 60)
+  const minutes = ~~(time / 60) % 60
+  const formatted = [String(minutes).padStart(2, '0'), String(seconds).padStart(2, '0')]
+
+  const hours = ~~(time / 3600)
+  if (hours) formatted.unshift(String(hours))
+
+  return formatted.join(':')
+}

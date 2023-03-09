@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import IconMicrophone from '@/components/icons/IconMicrophone.vue'
-import { today } from './utils/format'
+import LayoutHeader from '@/components/LayoutHeader.vue'
 </script>
 
 <template>
-  <IconMicrophone />
-  {{ today() }}
+  <LayoutHeader />
 </template>
 
 <style scoped lang="scss"></style>

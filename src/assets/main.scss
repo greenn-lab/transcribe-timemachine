@@ -1,0 +1,22 @@
+@import 'base';
+@import 'explode';
+
+main {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 4em);
+  padding: 2em 5em;
+}
+
+time {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+#controls {
+  align-items: center;
+  display: flex;
+  height: 30px;
+  gap: 10px;
+}
+
+
