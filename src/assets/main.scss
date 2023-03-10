@@ -1,15 +1,10 @@
 @import 'base';
 @import 'explode';
 
-main {
+#app {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 4em);
-  padding: 2em 5em;
-}
-
-time {
-  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
 }
 
 #controls {

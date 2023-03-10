@@ -1,4 +1,6 @@
-export default element => {
+export default (element: HTMLElement | null) => {
+  if (!element) return
+
   const piecesX = 9
   const piecesY = 4
 
@@ -16,7 +18,9 @@ export default element => {
     createParticles('debris', piecesX * piecesY, 1500)
   }
 
-  function createParticles(kind, count, duration) {
+  function createParticles(kind: 'fire' | 'debris', count: number, duration: number) {
+    if (!element) return
+
     for (let c = 0; c < count; ++c) {
       const r = randomFloat(0.25, 0.5)
       const diam = r * 2
@@ -49,7 +53,16 @@ class Particle {
   s: { x: number; y: number }
   d: { x: number; y: number }
 
-  constructor(parent, x, y, w, h, angle, distance = 1, className2 = '') {
+  constructor(
+    parent: HTMLElement,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    angle: number,
+    distance = 1,
+    className2 = ''
+  ) {
     const width = `${w}em`
     const height = `${h}em`
     const adjustedAngle = angle + Math.PI / 2
@@ -74,24 +87,44 @@ class Particle {
     }
   }
 
-  runSequence(el, keyframesArray, duration = 1e3, easing = 'linear', delay = 0) {
+  runSequence(
+    el: HTMLElement,
+    keyframesArray: Keyframe[],
+    duration = 1e3,
+    easing = 'linear',
+    delay = 0
+  ) {
     const animation = el.animate(keyframesArray, {
       duration: duration,
       easing: easing,
       delay: delay
     })
     animation.onfinish = () => {
-      const parentCL = el.parentElement.classList
+      const parentCL = el.parentElement?.classList
 
       el.remove()
 
-      if (!document.querySelector('.particle')) parentCL.remove(...parentCL)
+      if (!document.querySelector('.particle')) {
+        parentCL?.forEach(cb => {
+          parentCL.remove(cb)
+        })
+      }
     }
   }
 }
 
 class DebrisParticle extends Particle {
-  constructor(parent, x, y, w, h, angle, distance, duration, easing) {
+  constructor(
+    parent: HTMLElement,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    angle: number,
+    distance: number,
+    duration: number,
+    easing: string
+  ) {
     super(parent, x, y, w, h, angle, distance, 'particle--debris')
 
     const maxAngle = 1080
@@ -127,7 +160,17 @@ class DebrisParticle extends Particle {
 }
 
 class FireParticle extends Particle {
-  constructor(parent, x, y, w, h, angle, distance, duration, easing) {
+  constructor(
+    parent: HTMLElement,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    angle: number,
+    distance: number,
+    duration: number,
+    easing: string
+  ) {
     super(parent, x, y, w, h, angle, distance, 'particle--fire')
 
     const sx = this.s.x
@@ -164,7 +207,7 @@ class FireParticle extends Particle {
   }
 }
 
-function calcAngle(x1, y1, x2, y2) {
+function calcAngle(x1: number, y1: number, x2: number, y2: number) {
   const opposite = y2 - y1
   const adjacent = x2 - x1
   let angle = Math.atan(opposite / adjacent)
@@ -176,21 +219,23 @@ function calcAngle(x1, y1, x2, y2) {
   return angle
 }
 
-function propertyUnitsStripped(el, property, unit) {
+function propertyUnitsStripped(el: Element | null, property: string, unit: string) {
+  if (!el) return 0
+
   const cs = window.getComputedStyle(el)
   const valueRaw = cs.getPropertyValue(property)
   return ~~valueRaw.substring(0, valueRaw.indexOf(unit))
 }
 
-function pxToEm(px) {
+function pxToEm(px: number) {
   const el = document.querySelector(':root')
   return px / propertyUnitsStripped(el, 'font-size', 'px')
 }
 
-function randomFloat(min, max) {
+function randomFloat(min: number, max: number) {
   return Math.random() * (max - min) + min
 }
 
-function randomInt(min, max) {
+function randomInt(min: number, max: number) {
   return Math.round(Math.random() * (max - min)) + min
 }

@@ -1,72 +1,60 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+  import { ref } from 'vue'
+  import type { Segment } from '@/@types/Segment'
+  import SegmentItem from '@/components/segment/SegmentItem.vue'
+
+  const data = ref<Segment[]>([
+    {
+      index: 0,
+      start: 1234,
+      close: 4321,
+      title: '아름다운, 우리 한글! 한글사랑? 나라사랑.'
+    },
+    {
+      index: 1,
+      start: 1234,
+      close: 4321,
+      title: '아름다운, 우리 한글! 한글사랑? 나라사랑.'
+    }
+  ])
+</script>
 
 <template>
-  <ul></ul>
+  <ul>
+    <li v-for="item in data" :key="item.index">
+      <SegmentItem :item="item" />
+    </li>
+  </ul>
 </template>
 
 <style lang="scss" scoped>
-ul {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.4rem;
-  flex-grow: 1;
-  list-style: none;
-  margin: 1rem 0 0;
-  padding: 0.5rem 0;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+  ul {
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 0.4rem;
-    cursor: pointer;
-  }
-
-  > li {
-    display: flex;
-    align-items: baseline;
-  }
-
-  a {
-    text-align: right;
-    width: 10rem;
-  }
-
-  a::after {
-    content: ' ';
-  }
-
-  time {
-    font-family: 'Courier New', monospace;
-    opacity: 0.6;
-  }
-
-  time + time:not(:empty)::before {
-    content: '~';
-  }
-
-  p {
-    border-radius: 0.25rem;
-    outline: none;
-    margin: 0.25rem;
+    flex-grow: 1;
+    list-style: none;
+    margin: 1rem;
     padding: 0.5rem;
-    width: calc(100% - 10rem);
-  }
+    overflow-y: auto;
 
-  p:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-  }
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
 
-  p::selection {
-    background-color: #0005;
-    color: #fff;
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.4rem;
+      cursor: pointer;
+    }
+
+    > li {
+      display: flex;
+      align-items: baseline;
+    }
   }
-}
 </style>
