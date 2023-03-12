@@ -1,19 +1,17 @@
 <script lang="ts" setup>
-  import IconMicrophone from '@/assets/icons/IconMicrophone.vue'
-  import WaveFormRealtime from '@/components/navigate/WaveFormRealtime.vue'
-
   import explode from '@/utils/explode'
   import { useAudioStore } from '@/stores/audio'
 
+  import WaveFormRealtime from '@/components/navigate/WaveFormRealtime.vue'
+  import IconMicrophone from '@/assets/icons/IconMicrophone.vue'
+
   const audioStore = useAudioStore()
 
-  const recording = ({ currentTarget: target }: MouseEvent) => {
+  const record = ({ currentTarget: target }: MouseEvent) => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
-      .then(async (stream: MediaStream) => {
-        await audioStore.streaming(stream)
-        // recording(stream)
-        // establish()
+      .then((stream: MediaStream) => {
+        audioStore.record(stream)
       })
       .catch(() => {
         explode(target as HTMLElement)
@@ -26,17 +24,10 @@
     <WaveFormRealtime />
     <section>
       <div>
-        <button @click="e => recording(e)">
+        <a @click="record" class="p-10">
           <IconMicrophone />
-        </button>
+        </a>
       </div>
     </section>
   </header>
 </template>
-
-<style lang="scss" scoped>
-  canvas {
-    height: 60px;
-    width: 100%;
-  }
-</style>

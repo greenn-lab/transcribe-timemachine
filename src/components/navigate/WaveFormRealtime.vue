@@ -8,11 +8,11 @@
   watchEffect(() => {
     if (!canvas.value) return
 
-    const audioContext = audioStore.context as AudioContext
+    const audioContext: AudioContext = audioStore.audio.context
     const analyser = audioContext.createAnalyser()
     analyser.fftSize = 2048
 
-    const source = audioStore.source as MediaStreamAudioSourceNode
+    const source = audioStore.audio.source as MediaStreamAudioSourceNode
     source?.connect(analyser)
 
     const length = analyser.frequencyBinCount
@@ -59,3 +59,10 @@
 <template>
   <canvas ref="canvas" />
 </template>
+
+<style lang="scss" scoped>
+  canvas {
+    height: 60px;
+    width: 100%;
+  }
+</style>

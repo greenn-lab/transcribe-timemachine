@@ -1,31 +1,61 @@
 <script lang="ts" setup>
-import { timeFormat } from '@/utils/format'
-import type { Segment } from '@/@types/Segment'
-import { ref } from 'vue'
+  import { ref } from 'vue'
+  import { timeFormat } from '@/utils/format'
+  import { preventAndStop } from '@/utils/event'
 
-const RX_WORD = /[\wㄱ-힣,.?!~]/
-const RX_WORDS = /[\wㄱ-힣,.?!~]+/
+  import type { Segment } from '@/types/Segment'
 
-const props = defineProps<{ item: Segment }>()
-const item = ref(props.item)
+  const props = defineProps<{ item: Segment }>()
+  const item = ref(props.item)
 
-const grab = on => {
-  on &&
+  const breakLine = (e: Event) => {
+    preventAndStop(e)
+
+    const selection = window.getSelection()
+    if (!selection) return
+
+    let { anchorNode: node, anchorOffset: offset } = selection
+    if (!node) return
+
+    const text = node.textContent || ''
+
+    node.textContent = text.substring(0, offset) + '\n' + text.substring(offset++)
+    selection.setBaseAndExtent(node, offset, node, offset)
+  }
+  const grab = (viaMouse = false, toLeft = false) => {
     setTimeout(() => {
       const selection = window.getSelection()
-      if (!selection) return
+      if (!selection || !selection.focusNode || selection.anchorNode?.nodeType !== Node.TEXT_NODE)
+        return
 
-      let { anchorNode: node, anchorOffset: start, focusOffset: close } = selection
-      if (node?.nodeType !== Node.TEXT_NODE || start !== close) return
+      let {
+        anchorNode: { textContent },
+        anchorOffset: start,
+        focusOffset: close,
+        focusNode: node
+      } = selection
+      const text = textContent || ''
 
-      while (start > -1 && RX_WORD.test(node.textContent?.charAt(start - 1) || '')) start--
+      if (viaMouse || start === close) {
+        if (/\n/.test(text.charAt(start - 1))) start++
+        while (/\s/.test(text.charAt(start - 1))) start--
+        while (/\S/.test(text.charAt(start - 1))) start--
+        close = start + (/\S+/.exec(text.substring(start))?.[0].length || 0)
+      } else if (toLeft || start === close) {
+        while (/\s/.test(text.charAt(start - 1))) start--
+        close = start
+        while (/\S/.test(text.charAt(start - 1))) start--
+      } else {
+        while (/\s/m.test(text.charAt(close))) close++
+        start = close
+        while (/\S/m.test(text.charAt(close))) close++
+      }
 
-      const matched = RX_WORDS.exec(node.textContent?.substring(start) || '')
-      if (matched) {
-        selection.setBaseAndExtent(node, start, node, start + matched[0].length)
+      if (start > -1 && close <= text.length) {
+        selection.setBaseAndExtent(node, start, node, close)
       }
     }, 30)
-}
+  }
 </script>
 
 <template>
@@ -34,8 +64,20 @@ const grab = on => {
     <time>{{ timeFormat(item.close) }}</time>
   </a>
   <p
-    @keydown="e => grab(e.altKey && /^Arrow/.test(e.key))"
-    @mousedown="e => grab(e.altKey)"
+    @keydown="
+      e => {
+        if (e.ctrlKey && /^Arrow/.test(e.key)) {
+          grab(false, e.key === 'ArrowLeft')
+          preventAndStop(e)
+        }
+
+        if (e.key === 'Enter') {
+          breakLine(e)
+        }
+      }
+    "
+    @mousedown="e => e.ctrlKey && grab(true)"
+    @contextmenu="preventAndStop"
     contenteditable="true"
   >
     {{ item.title }}
@@ -43,37 +85,39 @@ const grab = on => {
 </template>
 
 <style lang="scss" scoped>
-a {
-  text-align: right;
-  width: 10rem;
+  a {
+    text-align: right;
+    width: 10rem;
 
-  &::after {
-    content: ' ';
-  }
-}
-
-time {
-  opacity: 0.5;
-
-  + time:not(:empty)::before {
-    content: '~';
-  }
-}
-
-p {
-  border-radius: 0.25rem;
-  outline: none;
-  margin: 0.25rem;
-  padding: 0.5rem;
-  width: calc(100% - 10rem);
-
-  &:focus {
-    background-color: rgba(255, 255, 255, 0.15);
+    &::after {
+      content: ' ';
+    }
   }
 
-  &::selection {
-    background-color: #0005;
-    color: #fff;
+  time {
+    opacity: 0.5;
+
+    + time:not(:empty)::before {
+      content: '~';
+    }
   }
-}
+
+  p {
+    border-radius: 0.25rem;
+    outline: none;
+    line-height: 1.2rem;
+    margin: 0.25rem;
+    padding: 0.5rem;
+    white-space: pre;
+    width: calc(100% - 10rem);
+
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &::selection {
+      background-color: #0005;
+      color: #fff;
+    }
+  }
 </style>

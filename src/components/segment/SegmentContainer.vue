@@ -1,26 +1,13 @@
 <script lang="ts" setup>
-  import { ref } from 'vue'
-  import type { Segment } from '@/@types/Segment'
+  import { useEngineStore } from '@/stores/engine'
   import SegmentItem from '@/components/segment/SegmentItem.vue'
 
-  const data = ref<Segment[]>([
-    {
-      index: 0,
-      start: 1234,
-      close: 4321,
-      title: '아름다운, 우리 한글! 한글사랑? 나라사랑.'
-    },
-    {
-      index: 1,
-      start: 1234,
-      close: 4321,
-      title: '아름다운, 우리 한글! 한글사랑? 나라사랑.'
-    }
-  ])
+  const engineStore = useEngineStore()
+  const data = engineStore.segments
 </script>
 
 <template>
-  <ul>
+  <ul class="m-4 p-2 rounded grow">
     <li v-for="item in data" :key="item.index">
       <SegmentItem :item="item" />
     </li>
@@ -30,11 +17,6 @@
 <style lang="scss" scoped>
   ul {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 0.4rem;
-    flex-grow: 1;
-    list-style: none;
-    margin: 1rem;
-    padding: 0.5rem;
     overflow-y: auto;
 
     &::-webkit-scrollbar {

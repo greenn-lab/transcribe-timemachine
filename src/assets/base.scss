@@ -1,12 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Nanum+Gothic+Coding&display=swap');
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-}
-
 html {
   scrollbar-color: #6969dd transparent;
   scrollbar-width: thin;
@@ -16,7 +9,7 @@ body {
   background-image: linear-gradient(to left top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
   font-family: 'Nanum Gothic Coding', sans-serif;
   font-size: 16px;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   width: 100vw;
   text-rendering: optimizeLegibility;
