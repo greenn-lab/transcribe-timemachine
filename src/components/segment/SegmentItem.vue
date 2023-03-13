@@ -1,123 +1,148 @@
 <script lang="ts" setup>
-  import { ref } from 'vue'
-  import { timeFormat } from '@/utils/format'
+  import { onMounted, onUnmounted, ref } from 'vue'
   import { preventAndStop } from '@/utils/event'
+  import { grabWord } from '@/utils/editor'
+  import { timeFormat } from '@/utils/format'
 
   import type { Segment } from '@/types/Segment'
 
   const props = defineProps<{ item: Segment }>()
   const item = ref(props.item)
+  const textarea = ref<HTMLTextAreaElement>()
 
-  const breakLine = (e: Event) => {
-    preventAndStop(e)
+  const { title } = item.value
 
-    const selection = window.getSelection()
-    if (!selection) return
+  onMounted(() => {
+    if (!textarea.value) return
+    textarea.value.style.height = `${textarea.value.scrollHeight}px`
+  })
 
-    let { anchorNode: node, anchorOffset: offset } = selection
-    if (!node) return
-
-    const text = node.textContent || ''
-
-    node.textContent = text.substring(0, offset) + '\n' + text.substring(offset++)
-    selection.setBaseAndExtent(node, offset, node, offset)
-  }
-  const grab = (viaMouse = false, toLeft = false) => {
-    setTimeout(() => {
-      const selection = window.getSelection()
-      if (!selection || !selection.focusNode || selection.anchorNode?.nodeType !== Node.TEXT_NODE)
-        return
-
-      let {
-        anchorNode: { textContent },
-        anchorOffset: start,
-        focusOffset: close,
-        focusNode: node
-      } = selection
-      const text = textContent || ''
-
-      if (viaMouse || start === close) {
-        if (/\n/.test(text.charAt(start - 1))) start++
-        while (/\s/.test(text.charAt(start - 1))) start--
-        while (/\S/.test(text.charAt(start - 1))) start--
-        close = start + (/\S+/.exec(text.substring(start))?.[0].length || 0)
-      } else if (toLeft || start === close) {
-        while (/\s/.test(text.charAt(start - 1))) start--
-        close = start
-        while (/\S/.test(text.charAt(start - 1))) start--
-      } else {
-        while (/\s/m.test(text.charAt(close))) close++
-        start = close
-        while (/\S/m.test(text.charAt(close))) close++
-      }
-
-      if (start > -1 && close <= text.length) {
-        selection.setBaseAndExtent(node, start, node, close)
-      }
-    }, 30)
-  }
+  onUnmounted(() => {
+    console.log(title + '\n' + item.value.title)
+  })
 </script>
 
 <template>
-  <a>
-    <time>{{ timeFormat(item.start) }}</time>
-    <time>{{ timeFormat(item.close) }}</time>
-  </a>
-  <p
-    @keydown="
-      e => {
-        if (e.ctrlKey && /^Arrow/.test(e.key)) {
-          grab(false, e.key === 'ArrowLeft')
-          preventAndStop(e)
+  <li>
+    <a>
+      <time>{{ timeFormat(item.start) }}</time>
+      <time>{{ timeFormat(item.close) }}</time>
+    </a>
+    <textarea
+      ref="textarea"
+      v-model="item.title"
+      @contextmenu="preventAndStop"
+      @keyup="
+        e => {
+          e.target.style.height = ''
+          e.target.style.height = `${e.target.scrollHeight}px`
         }
-
-        if (e.key === 'Enter') {
-          breakLine(e)
+      "
+      @keydown="
+        e => {
+          if (e.ctrlKey && /^Arrow/.test(e.key)) {
+            grabWord(false, e.key === 'ArrowLeft')
+            preventAndStop(e)
+          }
         }
-      }
-    "
-    @mousedown="e => e.ctrlKey && grab(true)"
-    @contextmenu="preventAndStop"
-    contenteditable="true"
-  >
-    {{ item.title }}
-  </p>
+      "
+      @mousedown="e => e.ctrlKey && grabWord(true)"
+      class="p-2 m-1"
+    />
+  </li>
 </template>
 
 <style lang="scss" scoped>
-  a {
-    text-align: right;
-    width: 10rem;
+  li {
+    display: flex;
+    align-items: baseline;
 
-    &::after {
-      content: ' ';
+    a {
+      text-align: right;
+      width: 10rem;
+
+      &::after {
+        content: ' ';
+      }
+    }
+
+    time {
+      opacity: 0.5;
+
+      &:first-child::after {
+        content: '~';
+      }
+    }
+
+    textarea {
+      background-color: transparent;
+      border-radius: 0.25rem;
+      height: 2rem;
+      line-height: 1.2rem;
+      outline: none;
+      overflow: hidden;
+      resize: none;
+      white-space: pre;
+      width: calc(100% - 10rem);
+
+      &:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      &::selection {
+        background-color: #0005;
+        color: #fff;
+      }
+    }
+
+    time:empty,
+    time:empty:before,
+    time:empty:after {
+      border-radius: 50%;
+      display: inline-block;
+      font-size: 12px;
+      height: 1em;
+      right: 0;
+      top: -2.5em;
+      width: 1em;
+      animation-fill-mode: both;
+      animation: cognito 1s infinite ease-in-out;
+    }
+
+    time:empty {
+      color: #ffffff;
+      left: -2em;
+      margin: 0 auto 0 3rem;
+      position: relative;
+      transform: translateZ(0);
+      animation-delay: 150ms;
+    }
+
+    time:empty:before,
+    time:empty:after {
+      content: '';
+      position: absolute;
+      top: 0;
+    }
+
+    time:empty:before {
+      left: -1.2em;
+    }
+
+    time:empty:after {
+      left: 1.2em;
+      animation-delay: 300ms;
     }
   }
 
-  time {
-    opacity: 0.5;
-
-    + time:not(:empty)::before {
-      content: '~';
+  @keyframes cognito {
+    0%,
+    80%,
+    100% {
+      box-shadow: 0 2.5em 0 -1em;
     }
-  }
-
-  p {
-    border-radius: 0.25rem;
-    outline: none;
-    line-height: 1.2rem;
-    margin: 0.25rem;
-    padding: 0.5rem;
-    white-space: pre;
-    width: calc(100% - 10rem);
-
-    &:focus {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    &::selection {
-      background-color: #0005;
-      color: #fff;
+    40% {
+      box-shadow: 0 2.5em 0 0;
     }
   }
 </style>

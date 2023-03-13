@@ -33,8 +33,12 @@ const float32ToInt16 = (buffer: Float32Array) => {
 export const useEngineStore = defineStore('engine-store', () => {
   let webSocket: WebSocket
 
-  const segments = ref<Segment[]>([])
+  const segments = ref<Segment[]>()
   const segment = ref<Segment>()
+
+  import('./engine.sample.json').then(res => {
+    segments.value = res.default
+  })
 
   const proceed = (buffer: AudioBuffer) => {
     if (webSocket?.readyState === 1) {
@@ -62,10 +66,10 @@ export const useEngineStore = defineStore('engine-store', () => {
       const response = parsed as Response
       if (response.segment !== segment.value?.index) {
         segment.value = {
-          index: response.segment,
+          index: segments.value?.length || 0,
           start: audio.context.currentTime
         }
-        segments.value.push(segment.value)
+        segments.value?.push(segment.value)
       }
 
       segment.value.title = response.result.hypotheses[0].transcript

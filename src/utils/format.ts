@@ -10,9 +10,11 @@ export const dateFormat = (now = new Date(), delimiter = ' '): string => {
   )
 }
 
-export const timeFormat = (time = 0): string => {
-  return [
-    String(~~(time / 3600)),
-    ...[~~(time / 60) % 60, ~~(time % 60)].map(i => String(i).padStart(2, '0'))
-  ].join(':')
+export const timeFormat = (time: number): string => {
+  return !time
+    ? ''
+    : [
+        String(~~(time / 3600)),
+        ...[~~(time / 60) % 60, ~~(time % 60)].map(i => String(i).padStart(2, '0'))
+      ].join(':')
 }
